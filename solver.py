@@ -1,101 +1,93 @@
 import copy
-import time
-from functools import wraps
-
-import cell
+from decorators import measure_time
+import field
 import parser as pars
 import paterns as pat
-from decorators import measure_time
-
 
 @measure_time
-def solve(field):
+def solve(game_field):
     rez = []
-    field = pat.run_patterns(field)
-    steak = []
-    if is_solve(field):
-        rez.append(field)
-    steak.append(field)
-    visited = []
-    while len(steak) != 0:
-        field = steak.pop()
-        if field in visited:
-            continue
-        visited.append(cell.field_to_string(field))
-        new_fields = get_all_step(field)
+    game_field = pat.run_patterns(game_field)
+    steak = [game_field]
+    visited = set()
+
+    if is_solve(game_field):
+        rez.append(game_field)
+
+    while steak:
+        current_field = steak.pop()
+        new_fields = get_all_step(current_field)
         for new_field in new_fields:
-            if cell.field_to_string(new_field) in visited:
+            field_str = new_field.field_to_string()
+            if field_str in visited:
                 continue
-            visited.append(cell.field_to_string(new_field))
+            visited.add(field_str)
             if is_solve(new_field):
                 rez.append(new_field)
             else:
                 steak.append(new_field)
     return rez
 
-def get_all_repeats(field):
+def get_all_repeats(game_field):
     rez = set()
-    for x in range(len(field)):
+    for x in range(game_field.field_len):
         line_y = {}
         line_x = {}
-        for y in range(len(field[0])):
-            if field[x][y].value != 0:
-                if field[x][y].value in line_y.keys():
-                    rez.add(line_y[field[x][y].value])
+        for y in range(x,game_field.field_len):
+            if not game_field.is_black(x, y) and not game_field.is_white(x,y):
+                val = game_field.values[x][y]
+                if val in line_y:
+                    rez.add(line_y[val])
                     rez.add((x, y))
-                line_y[field[x][y].value] = (x, y)
-            if field[y][x].value != 0:
-                if field[y][x].value in line_x.keys():
-                    rez.add(line_x[field[y][x].value])
+                line_y[val] = (x, y)
+            if x==y:
+                continue
+            if not game_field.is_black(y, x) and not game_field.is_white(y, x):
+                val = game_field.values[y][x]
+                if val in line_x:
+                    rez.add(line_x[val])
                     rez.add((y, x))
-                line_x[field[y][x].value] = (y, x)
+                line_x[val] = (y, x)
     return rez
 
-def white_have_way(field):
-    steak = []
-    if field[0][0].is_black:
-        steak.append((0, 1))
-    else:
-        steak.append((0, 0))
-    visited = []
-    while len(steak) != 0:
-        point = steak.pop()
-        visited.append(point)
-        for dx in range(-1, 2):
-            for dy in range(-1, 2):
-                if (abs(dx) + abs(dy) == 1
-                        and cell.argument_correct(point[0] + dx, len(field) - 1)
-                        and cell.argument_correct(point[1] + dy, len(field[0]) - 1)
-                        and not field[point[0] + dx][point[1] + dy].is_black):
-                    if not ((point[0] + dx, point[1] + dy) in visited):
-                        steak.append((point[0] + dx, point[1] + dy))
-    for x in range(len(field)):
-        for y in range(len(field[0]) - 1):
-            if field[x][y].is_black:
-                continue
-            if not ((x, y) in visited):
+def white_have_way(game_field):
+    start = (0, 1) if game_field.is_black(0, 0) else (0, 0)
+    steak = [start]
+    visited = set()
+
+    while steak:
+        x, y = steak.pop()
+        if (x, y) in visited:
+            continue
+        visited.add((x, y))
+        for dx, dy in [(0,1), (1,0), (0,-1), (-1,0)]:
+            new_x, new_y = x + dx, y + dy
+            if (game_field.argument_correct(new_x) and 
+                game_field.argument_correct(new_y) and 
+                not game_field.is_black(new_x, new_y)):
+                steak.append((new_x, new_y))
+
+    for x in range(game_field.field_len):
+        for y in range(game_field.field_len):
+            if not game_field.is_black(x, y) and (x, y) not in visited:
                 return False
     return True
 
+def is_solve(game_field):
+    return len(get_all_repeats(game_field)) == 0 and white_have_way(game_field)
 
-def is_solve(field):
-    return len(get_all_repeats(field)) == 0 and white_have_way(field)
-
-def get_all_step(field):
+def get_all_step(game_field):
     rez = []
-    new_field = copy.deepcopy(field)
-    points = get_all_repeats(field)
-    for point in points:
-        x, y = point[0], point[1]
-        if not field[x][y].is_white:
-            cell.set_black(new_field, x, y)
-            rez.append(new_field)
-            new_field = copy.deepcopy(field)
+    points = get_all_repeats(game_field)
+    for x, y in points:
+        new_field = game_field.copy()
+        new_field.set_black(x, y)
+        rez.append(new_field)
     return rez
-
 
 if __name__ == "__main__":
     field = pars.get_field_by_console()
     fields = solve(field)
     for i in fields:
         pars.write_field(i)
+

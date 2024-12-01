@@ -1,4 +1,5 @@
-import cell as cell
+import field as fl
+
 
 
 def read():
@@ -33,19 +34,17 @@ def convent_x_y(mass):
 
 
 def create_gaming_field(mass):
-    rez = []
-    for x in range(len(mass)):
-        line = []
-        for y in range(len(mass[0])):
-            line.append(cell.cell(mass[x][y]))
-        rez.append(line)
+    rez=fl.solve_field(mass)
     return rez
 
 
 def write_field(field):
-    for y in range(len(field)):
-        for x in range(len(field[0])):
-            print(" " + str(field[x][y].value) + " ", end="")
+    for y in range(field.field_len):
+        for x in range(field.field_len):
+            value_to_print=field.values[x][y]
+            if field.cells[x][y]==fl.cell.black:
+                value_to_print=0
+            print(" " + str(value_to_print) + " ", end="")
         print()
     print()
 

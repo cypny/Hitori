@@ -8,6 +8,6 @@ def measure_time(func):
         result = func(*args, **kwargs)
         end_time = time.time()
         execution_time = end_time - start_time
-        print(f"Функция '{func.__name__}' выполнилась за {execution_time:.6f} секунд")
+        print(f"Функция '{func.__name__}' выполнилась за {execution_time:.10f} секунд")
         return result
     return wrapper

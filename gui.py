@@ -14,7 +14,7 @@ class gui_builder:
         self.size_y = 800
         self.width_cell = (size_x - 200) / n
         self.height_cell = (size_y - 200) / n
-        self.table = []
+        self.table_gui = []
         self.all_solve = []
 
     def create_start_menu(self):
@@ -47,6 +47,7 @@ class gui_builder:
         self.all_solve = sol.solve(game_field)
         if len(self.all_solve) == 0:
             self.create_no_solve_window()
+        self.current_solve=0
         self.create_solve_window()
 
     def create_table(self):
@@ -59,16 +60,16 @@ class gui_builder:
                 cell.place(x=100 + x * self.width_cell, y=100 + y * self.height_cell, width=self.width_cell,
                            height=self.height_cell)
             table.append(line)
-        self.table = table
+        self.table_gui = table
 
     def update_table(self):
         field = self.all_solve[self.current_solve]
         for x in range(self.n):
             for y in range(self.n):
-                if field[x][y].value == 0:
-                    self.table[x][y].configure(text=field[x][y].value, bg="#000000")
+                if field.cells[x][y].value == 1:
+                    self.table_gui[x][y].configure(text=field.values[x][y], bg="#000000")
                     continue
-                self.table[x][y].configure(text=field[x][y].value, bg="#FFFFFF")
+                self.table_gui[x][y].configure(text=field.values[x][y], bg="#FFFFFF")
 
     def create_no_solve_window(self):
         text_counter = Label(self.window,
