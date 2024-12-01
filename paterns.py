@@ -1,7 +1,6 @@
 import field
 from decorators import measure_time
 
-@measure_time
 def run_patterns(game_field):
     for x in range(game_field.field_len):
         for y in range(game_field.field_len):
