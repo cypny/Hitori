@@ -33,23 +33,20 @@ def get_all_repeats(game_field):
     for x in range(game_field.field_len):
         line_y = {}
         line_x = {}
-        for y in range(x,game_field.field_len):
-            if not game_field.is_black(x, y) and not game_field.is_white(x,y):
+        for y in range(game_field.field_len):
+            if not game_field.is_black(x, y):
                 val = game_field.values[x][y]
                 if val in line_y:
                     rez.add(line_y[val])
                     rez.add((x, y))
                 line_y[val] = (x, y)
-            if x==y:
-                continue
-            if not game_field.is_black(y, x) and not game_field.is_white(y, x):
+            if not game_field.is_black(y, x):
                 val = game_field.values[y][x]
                 if val in line_x:
                     rez.add(line_x[val])
                     rez.add((y, x))
                 line_x[val] = (y, x)
     return rez
-
 def white_have_way(game_field):
     start = (0, 1) if game_field.is_black(0, 0) else (0, 0)
     steak = [start]
@@ -80,6 +77,8 @@ def get_all_step(game_field):
     rez = []
     points = get_all_repeats(game_field)
     for x, y in points:
+        if game_field.is_white(x,y):
+            continue
         new_field = game_field.copy()
         new_field.set_black(x, y)
         rez.append(new_field)

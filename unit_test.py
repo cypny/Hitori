@@ -22,10 +22,14 @@ class Tests(unittest.TestCase):
         field_4.set_black(0, 1)
         field_4.set_black(1, 0)
         result_4 = sol.is_solve(field_4)
+        field_5 = pars.get_field_by_str("3\n1 2 3\n4 2 6\n7 8 9")
+        field_5.set_black(1, 1)
+        result_5=sol.is_solve(field_5)
         self.assertEqual(result_1, True)
         self.assertEqual(result_2, False)
         self.assertEqual(result_3, False)
         self.assertEqual(result_4, False)
+        self.assertEqual(result_5, True)
 
     def test_patern_two_equal_nearby(self):
         z=pars.get_field_by_str("3\n1 2 1\n4 5 6\n7 8 9")
@@ -64,5 +68,7 @@ class Tests(unittest.TestCase):
         game_field = pars.get_field_by_str("3\n1 2 1\n4 5 6\n7 8 9")
         repeats = sol.get_all_repeats(game_field)
         self.assertEqual(len(repeats), 2)
+    def test_can_find_real_solve(self):
+        pass
 
 

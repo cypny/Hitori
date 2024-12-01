@@ -26,7 +26,7 @@ class solve_field:
                     self.set_white(x + dx, y + dy)
 
     def argument_correct(self, i):
-        return 0 <= i <= self.field_len - 1
+        return 0 <= i < self.field_len
 
     def field_to_string(self):
         rez = []
