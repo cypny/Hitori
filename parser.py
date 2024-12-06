@@ -1,7 +1,6 @@
 import field as fl
 
 
-
 def read():
     n = int(input())
     mass = []
@@ -34,16 +33,16 @@ def convent_x_y(mass):
 
 
 def create_gaming_field(mass):
-    rez=fl.solve_field(mass)
+    rez = fl.solve_field(mass)
     return rez
 
 
 def write_field(field):
     for y in range(field.field_len):
         for x in range(field.field_len):
-            value_to_print=field.values[x][y]
-            if field.cells[x][y]==fl.cell.black:
-                value_to_print=0
+            value_to_print = field.values[x][y]
+            if field.cells[x][y] == fl.cell.black:
+                value_to_print = 0
             print(" " + str(value_to_print) + " ", end="")
         print()
     print()

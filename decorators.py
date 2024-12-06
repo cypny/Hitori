@@ -1,6 +1,7 @@
 import time
 from functools import wraps
 
+
 def measure_time(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -10,4 +11,5 @@ def measure_time(func):
         execution_time = end_time - start_time
         print(f"Функция '{func.__name__}' выполнилась за {execution_time:.10f} секунд")
         return result
+
     return wrapper
