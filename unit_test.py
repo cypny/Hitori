@@ -1,131 +1,66 @@
+from parser import *
+from main import *
 import pytest
-import parser as pars
-import paterns as pat
-import solver as sol
-import asyncio
+
+
+def test_create_gaming_board_by_str_valid():
+    test_board = """5
+    empty black empty white empty
+    black empty black empty black
+    empty empty black empty white
+    white black empty empty empty
+    empty empty black empty empty"""
+
+    board = create_gaming_board_by_str(test_board)
+    assert board is not None
+    assert board.board_size == 5
+
+
+def test_create_gaming_board_by_str_invalid():
+    test_board = """5
+    empty black empty white empty
+    black empty black empty black
+    empty empty black empty white
+    white black invalid empty empty
+    empty empty black empty empty"""
+
+    board = create_gaming_board_by_str(test_board)
+    assert board is None
+
 
 @pytest.mark.parametrize("input_str, expected_output", [
-    (
-        "3\n1 2 3\n4 5 6\n7 8 9",
-        [[1, 4, 7], [2, 5, 8], [3, 6, 9]]
-    )
+    ("5\nblack black black black black\nempty empty empty empty empty\nempty empty empty empty empty\nempty empty empty empty empty\nempty empty empty empty empty", True),
+    ("5\nempty black empty empty empty\nempty black empty empty empty\nempty black empty empty empty\nempty black empty empty empty\nempty black empty empty empty", True),
+    ("5\nblack empty empty empty empty\nempty black empty empty empty\nempty empty black empty empty\nempty empty empty black empty\nempty empty empty empty black", True),
+    ("5\nblack empty empty empty empty\nempty black empty empty empty\nempty empty black empty empty\nempty empty empty black empty\nempty empty empty empty empty", False),
 ])
-def test_parser(input_str, expected_output):
-    mass_value = pars.readstr(input_str)
-    output = pars.create_gaming_field(mass_value)
-    for x in range(len(expected_output)):
-        for y in range(len(expected_output[0])):
-            assert expected_output[x][y] == output.values[x][y]
+def test_check_win_parametrized(input_str, expected_output):
+    board = create_gaming_board_by_str(input_str)
+    assert board.check_win() == expected_output
 
-@pytest.mark.parametrize("input_str, expected_result", [
-    ("3\n1 2 3\n4 5 6\n7 8 9", True),
-    ("3\n1 1 1\n2 5 6\n7 8 9", False),
-    ("3\n1 2 3\n4 2 6\n7 8 9", False)
+
+@pytest.mark.parametrize("input_board_str, expected_move", [
+    ("5\nblack empty empty empty empty\nempty black empty empty empty\nempty empty black empty empty\nempty empty empty black empty\nempty empty empty empty empty", (4, 4)),
+    ("5\nblack black empty black black\nempty empty empty empty empty\nempty empty empty empty empty\nempty empty empty empty empty\nempty empty empty empty empty", (2, 2)),
+    ("5\n5\nempty empty black empty empty\nempty empty empty black empty\nempty black empty empty empty\nempty black empty empty empty\nempty empty black empty empty", (2,0)),
 ])
-def test_is_solve(input_str, expected_result):
-    result = sol.is_solve(pars.get_field_by_str(input_str))
-    assert result == expected_result
-
-def test_is_solve_with_black_cells():
-    field_4 = pars.get_field_by_str("3\n1 2 3\n4 5 6\n7 8 9")
-    field_4.set_black(0, 1)
-    field_4.set_black(1, 0)
-    assert sol.is_solve(field_4) == False
-
-    field_5 = pars.get_field_by_str("3\n1 2 3\n4 2 6\n7 8 9")
-    field_5.set_black(1, 1)
-    assert sol.is_solve(field_5) == True
-
-@pytest.mark.parametrize("input_str, expected_x, expected_y", [
-    ("3\n1 2 1\n4 5 6\n7 8 9", 1, 0),
-    ("3\n1 2 3\n4 5 6\n1 8 9", 0, 1)
-])
-def test_patern_two_equal_nearby(input_str, expected_x, expected_y):
-    field = pars.get_field_by_str(input_str)
-    result = pat.run_patterns(field)
-    assert result.is_white(expected_x, expected_y)
-
-@pytest.mark.parametrize("input_str, expected_positions", [
-    (
-        "3\n1 2 3\n5 5 5\n7 8 9",
-        [(0, 1), (2, 1)]
-    ),
-    (
-        "3\n1 2 3\n1 5 6\n1 8 9",
-        [(0, 0), (0, 2)]
-    )
-])
-def test_patern_three_equal_nearby(input_str, expected_positions):
-    result = pat.run_patterns(pars.get_field_by_str(input_str))
-    for x, y in expected_positions:
-        assert result.is_black(x, y)
-
-@pytest.mark.parametrize("input_str, expected_x, expected_y", [
-    ("4\n1 2 3 4\n5 5 3 5\n7 8 9 5\n1 2 3 4", 3, 1),
-    ("4\n1 2 3 4\n1 10 3 5\n7 8 9 5\n1 2 3 4", 0, 3)
-])
-def test_patern_three_equal(input_str, expected_x, expected_y):
-    result = pat.run_patterns(pars.get_field_by_str(input_str))
-    assert result.is_black(expected_x, expected_y)
-
-def test_white_have_way():
-    game_field = pars.get_field_by_str("3\n1 2 3\n4 5 6\n7 8 9")
-    game_field.set_black(0, 0)
-    game_field.set_black(1, 1)
-    game_field.set_black(0, 2)
-    assert sol.white_have_way(game_field) is False
-
-def test_get_all_repeats():
-    game_field = pars.get_field_by_str("3\n1 2 1\n4 5 6\n7 8 9")
-    repeats = sol.get_all_repeats(game_field)
-    assert len(repeats) == 2
-
-@pytest.mark.parametrize("input_str, expected_blacks", [
-    (
-        "5\n2 5 2 1 2\n5 2 4 4 2\n4 2 1 5 3\n5 4 2 2 5\n2 3 5 4 2",
-        [
-            (0, 0), (0, 4),
-            (1, 1), (1, 3),
-            (3, 0), (3, 2),
-            (4, 4)
-        ]
-    ),
-    (
-        "5\n4 2 3 2 4\n2 5 3 3 4\n1 3 5 2 2\n1 2 2 1 3\n3 4 2 5 2",
-        [
-            (0, 1), (0, 4),
-            (1, 2),
-            (2, 3),
-            (3, 0), (3, 2),
-            (4, 4)
-        ]
-    ),
-    (
-        "5\n3 3 5 1 3\n1 3 4 2 5\n1 5 2 3 3\n2 4 3 4 1\n3 1 2 4 3",
-        [
-            (0, 1), (0, 4),
-            (2, 0), (2, 2), (2, 4),
-            (3, 3),
-            (4, 0), (4, 4)
-        ]
-    )
-])
-def test_real_in_solved(input_str, expected_blacks):
-    solver = sol.Solver()
-    field = pars.get_field_by_str(input_str)
-    solutions = asyncio.run(solver.solve(field))
-    found_solution = False
-    for solution in solutions:
-        current_blacks = []
-        for x in range(5):
-            for y in range(5):
-                if solution.is_black(x, y):
-                    current_blacks.append((x, y))
-        
-        if sorted(current_blacks) == sorted(expected_blacks):
-            found_solution = True
-            break
-    
-    assert found_solution
+def test_find_win_move_parametrized(input_board_str, expected_move):
+    board = create_gaming_board_by_str(input_board_str).board
+    bot_easy = easy_bot.easy_bot(Color.WHITE, 5)
+    bot_hard = hard_bot.hard_bot(Color.WHITE, 5)
+    bot_easy.board = board
+    bot_hard.board = board
+    assert bot_hard.find_win_move() == expected_move
+    assert bot_easy.find_win_move(Color.BLACK) == expected_move
 
 
+
+
+def test_make_move():
+    game_1 = game.game(5)
+    game_1.make_move(1, 1)
+    game_1.make_move(0, 0)
+    game_1.make_move(2, 2)
+    assert game_1.board[1][1] == Color.BLACK
+    assert game_1.board[0][0] == Color.WHITE
+    assert game_1.board[2][2] == Color.BLACK
