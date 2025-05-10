@@ -189,7 +189,6 @@ class SolutionWindow:
 
         self._init_ui()
 
-        # Проверяем наличие автосохранения
         if game_field is None and self.solver.load_state("solver_state.pickle"):
             self.status_label.configure(text="Продолжаем поиск решений...")
             self.window.after(100, lambda: self._async_start_solving(self.solver.current_field))
